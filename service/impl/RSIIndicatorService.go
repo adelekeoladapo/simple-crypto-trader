@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"gitlab.com/dapo/crypto-trader/service"
+	"log"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type RSIIndicatorService struct {
@@ -34,6 +36,7 @@ func (rsiIndicatorService *RSIIndicatorService) Process() (e error) {
 	if rsi > rsiIndicatorService.RSI_OVERBOUGHT {
 		if rsiIndicatorService.IN_POSITION {
 			fmt.Println("> > > Sell! Sell! Sell!")
+			rsiIndicatorService.IN_POSITION = false
 		} else {
 			fmt.Println("> > > It is overbought but I don't own any. Nothing to sell")
 		}
@@ -42,6 +45,7 @@ func (rsiIndicatorService *RSIIndicatorService) Process() (e error) {
 			fmt.Println("> > > It is oversold, but I already own it. No need to buy")
 		} else {
 			fmt.Println("> > > Buy! Buy! Buy!")
+			rsiIndicatorService.IN_POSITION = true
 		}
 	}
 
@@ -84,6 +88,8 @@ func (rsiIndicatorService *RSIIndicatorService) sumArray(arr []float64) (sum flo
 	return
 }
 
+var singleton service.IndicatorService
+var lock sync.Mutex
 func GetRSIIndicatorService(closes []float64) service.IndicatorService {
 	period, _ := strconv.ParseInt(os.Getenv("RSI_PERIOD"), 10, 0)
 	oversold, _ := strconv.ParseFloat(os.Getenv("RSI_OVERSOLD"), 64)
@@ -91,12 +97,18 @@ func GetRSIIndicatorService(closes []float64) service.IndicatorService {
 	symbol := os.Getenv("TRADE_SYMBOL")
 	quantity, _ := strconv.ParseFloat(os.Getenv("TRADE_QUANTITY"), 64)
 
-	return &RSIIndicatorService{
-		RSI_PERIOD:     int(period),
-		RSI_OVERSOLD:   oversold,
-		RSI_OVERBOUGHT: overbought,
-		TRADE_SYMBOL:   symbol,
-		TRADE_QUANTITY: quantity,
-		CLOSE_PRICES:   closes,
+	lock.Lock()
+	defer lock.Unlock()
+	if singleton == nil {
+		log.Println("Create new instance of RSI Indicator")
+		singleton = &RSIIndicatorService{
+			RSI_PERIOD:     int(period),
+			RSI_OVERSOLD:   oversold,
+			RSI_OVERBOUGHT: overbought,
+			TRADE_SYMBOL:   symbol,
+			TRADE_QUANTITY: quantity,
+			CLOSE_PRICES:   closes,
+		}
 	}
+	return singleton
 }

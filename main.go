@@ -37,7 +37,6 @@ func main() {
 	}
 
 	var closes []float64
-
 	for {
 		_, message, readErr := conn.ReadMessage()
 		if readErr != nil {
