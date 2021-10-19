@@ -80,7 +80,7 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 							} else {
 								log.Println("> > > Buy order was successfully placed")
 								indicatorProcessor.showPosition()
-								inPosition = false
+								inPosition = true
 							}
 						}
 					}
