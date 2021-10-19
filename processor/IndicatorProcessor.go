@@ -18,6 +18,7 @@ type IndicatorProcessor struct {
 	RSI_OVERSOLD float64
 	TRADE_SYMBOL string
 	TRADE_QUANTITY float64
+	IN_POSITION bool
 	ExchangeService service.ExchangeService
 }
 
@@ -32,7 +33,7 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 	}
 
 	var closes []float64
-	inPosition := false
+	inPosition := indicatorProcessor.IN_POSITION
 	for {
 		_, message, readErr := conn.ReadMessage()
 		if readErr != nil {
@@ -110,6 +111,7 @@ func GetIndicatorProcessor() IndicatorProcessor {
 	overbought, _ := strconv.ParseFloat(os.Getenv("RSI_OVERBOUGHT"), 64)
 	symbol := os.Getenv("TRADE_SYMBOL")
 	quantity, _ := strconv.ParseFloat(os.Getenv("TRADE_QUANTITY"), 64)
+	inPosition, _ := strconv.ParseBool(os.Getenv("IN_POSITION"))
 	log.Println("Create new instance of RSI Indicator")
 	return IndicatorProcessor{
 		RSI_PERIOD:     	int(period),
@@ -117,6 +119,7 @@ func GetIndicatorProcessor() IndicatorProcessor {
 		RSI_OVERSOLD: 		oversold,
 		TRADE_SYMBOL: 		symbol,
 		TRADE_QUANTITY: 	quantity,
+		IN_POSITION: 		inPosition,
 		ExchangeService: 	impl.GetBinanceService(),
 	}
 }
