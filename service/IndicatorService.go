@@ -2,7 +2,7 @@ package service
 
 type IndicatorService interface {
 
-	Process() error
+	GetIndicator() (float64, error)
 
 	GetBuyAmount() (float64, error)
 
