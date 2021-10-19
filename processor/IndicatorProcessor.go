@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"gitlab.com/dapo/crypto-trader/dto"
+	"gitlab.com/dapo/crypto-trader/service"
 	"gitlab.com/dapo/crypto-trader/service/impl"
 	"log"
 	"os"
@@ -17,6 +18,7 @@ type IndicatorProcessor struct {
 	RSI_OVERSOLD float64
 	TRADE_SYMBOL string
 	TRADE_QUANTITY float64
+	ExchangeService service.ExchangeService
 }
 
 func (indicatorProcessor *IndicatorProcessor) Process() {
@@ -58,7 +60,13 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 					if rsiIndicatorValue > indicatorProcessor.RSI_OVERBOUGHT {
 						if inPosition {
 							fmt.Println("> > > Sell! Sell! Sell!")
-							inPosition = false
+							if sellErr := indicatorProcessor.ExchangeService.PlaceSellOrder(indicatorProcessor.TRADE_SYMBOL, indicatorProcessor.TRADE_QUANTITY); sellErr != nil {
+								log.Println("> > > ERROR: Could not place sell order.", sellErr)
+							} else {
+								log.Println("> > > Sell order was successfully placed")
+								indicatorProcessor.showPosition()
+								inPosition = false
+							}
 						} else {
 							fmt.Println("> > > It is overbought but I don't own any. Nothing to sell")
 						}
@@ -67,13 +75,29 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 							fmt.Println("> > > It is oversold, but I already own it. No need to buy")
 						} else {
 							fmt.Println("> > > Buy! Buy! Buy!")
-							inPosition = true
+							if buyErr := indicatorProcessor.ExchangeService.PlaceBuyOrder(indicatorProcessor.TRADE_SYMBOL, indicatorProcessor.TRADE_QUANTITY); buyErr != nil {
+								log.Println("> > > ERROR: Could not place buy order.", buyErr)
+							} else {
+								log.Println("> > > Buy order was successfully placed")
+								indicatorProcessor.showPosition()
+								inPosition = false
+							}
 						}
 					}
 				}
 				closes = closes[1:]
 			}
 		}
+	}
+}
+
+
+func (indicatorProcessor *IndicatorProcessor) showPosition() {
+	positions, err := indicatorProcessor.ExchangeService.GetPositions()
+	if err != nil {
+		log.Println("> > > Error occurred while getting position. ", err)
+	} else {
+		log.Println("Position: ", positions)
 	}
 }
 
@@ -93,5 +117,6 @@ func GetIndicatorProcessor() IndicatorProcessor {
 		RSI_OVERSOLD: 		oversold,
 		TRADE_SYMBOL: 		symbol,
 		TRADE_QUANTITY: 	quantity,
+		ExchangeService: 	impl.GetBinanceService(),
 	}
 }

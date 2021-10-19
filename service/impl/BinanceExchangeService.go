@@ -24,8 +24,8 @@ func (binanceExchangeService *BinanceExchangeService) GetPositions() (positions 
 	return
 }
 
-func (binanceExchangeService *BinanceExchangeService) PlaceBuyOrder(symbol string, side string, orderType string, quantity float64) (e error) {
-	order := binance.MarketOrder{Symbol: symbol, Side: side, Type: orderType, Quantity: quantity}
+func (binanceExchangeService *BinanceExchangeService) PlaceBuyOrder(symbol string, quantity float64) (e error) {
+	order := binance.MarketOrder{Symbol: symbol, Side: "BUY", Type: "MARKET", Quantity: quantity}
 	res, e := binanceExchangeService.Client.PlaceMarketOrder(order)
 	if e != nil {
 		return e
@@ -34,8 +34,8 @@ func (binanceExchangeService *BinanceExchangeService) PlaceBuyOrder(symbol strin
 	return
 }
 
-func (binanceExchangeService *BinanceExchangeService) PlaceSellOrder(symbol string, side string, orderType string, quantity float64) (e error) {
-	order := binance.MarketOrder{Symbol: symbol, Side: side, Type: orderType, Quantity: quantity}
+func (binanceExchangeService *BinanceExchangeService) PlaceSellOrder(symbol string, quantity float64) (e error) {
+	order := binance.MarketOrder{Symbol: symbol, Side: "SELL", Type: "MARKET", Quantity: quantity}
 	res, e := binanceExchangeService.Client.PlaceMarketOrder(order)
 	if e != nil {
 		return e
