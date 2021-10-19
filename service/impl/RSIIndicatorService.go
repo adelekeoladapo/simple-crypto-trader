@@ -3,7 +3,6 @@ package impl
 import (
 	"fmt"
 	"gitlab.com/dapo/crypto-trader/service"
-	"log"
 )
 
 type RSIIndicatorService struct {
@@ -51,7 +50,6 @@ func (rsiIndicatorService *RSIIndicatorService) sumArray(arr []float64) (sum flo
 }
 
 func GetRSIIndicatorService(closes []float64, period int) service.IndicatorService {
-	log.Println("RSI Closes: ", closes)
 	return &RSIIndicatorService{
 		RSI_PERIOD:     int(period),
 		CLOSE_PRICES:   closes,
