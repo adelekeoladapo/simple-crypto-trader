@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"gitlab.com/dapo/crypto-trader/db"
-	"gitlab.com/dapo/crypto-trader/processor"
+	"gitlab.com/dapo/crypto-trader/dto"
+	"gitlab.com/dapo/crypto-trader/service"
+	"gitlab.com/dapo/crypto-trader/service/impl"
 	"log"
 	"os"
 )
@@ -24,10 +27,28 @@ func main() {
 
 
 
+	// Test new trade
+	var tradeService service.TradeService
+	tradeService = impl.GetTradeServiceImpl()
+	newTradeRequest := dto.NewTradeRequest{
+		Quantity:            11.4,
+		Product:             "ETHUSDT",
+		CurrentPrice:        100,
+		EntryPrice:          95,
+		MinimumSellingPrice: 120.5,
+	}
+	if res, err := tradeService.CreateTrade(newTradeRequest); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("Response: %v \n", res)
+	}
 
-	p := processor.GetIndicatorProcessor()
 
-	p.Process()
+
+
+	//p := processor.GetIndicatorProcessor()
+	//
+	//p.Process()
 
 }
 

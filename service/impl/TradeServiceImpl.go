@@ -5,6 +5,8 @@ import (
 	"gitlab.com/dapo/crypto-trader/enum/status"
 	"gitlab.com/dapo/crypto-trader/model"
 	"gitlab.com/dapo/crypto-trader/repository"
+	"gitlab.com/dapo/crypto-trader/repository/impl"
+	"gitlab.com/dapo/crypto-trader/service"
 	"log"
 	"time"
 )
@@ -14,15 +16,16 @@ type TradeServiceImpl struct{
 }
 
 func (TradeServiceImpl *TradeServiceImpl) CreateTrade(request dto.NewTradeRequest) (response dto.TradeResponse, e error) {
+	now := time.Now()
 	trade := model.Trade{}
-	trade.CreatedTime = time.Now()
-	trade.Price = request.CurrentPrice
-	trade.Quantity = request.Quantity // TODO: validate quantity
+	trade.CreatedTime = &now
+	trade.UnitPrice = request.CurrentPrice
+	trade.Quantity = request.Quantity
 	trade.Product = request.Product
 	trade.EntryPrice = request.EntryPrice
 	trade.MinimumSellingPrice = request.MinimumSellingPrice
 	trade.TradingCost = 0  // TODO: find out trading cost
-	trade.CostPrice = trade.EntryPrice + trade.TradingCost
+	trade.CostPrice = (trade.EntryPrice * trade.Quantity) + trade.TradingCost
 	trade.Status = status.PENDING
 
 	trade, e = TradeServiceImpl.repository.CreateTrade(trade)
@@ -51,7 +54,7 @@ func (TradeServiceImpl *TradeServiceImpl) generateResponseFromTrade(trade model.
 	response.Product = trade.Product
 	response.Quantity = trade.Quantity
 	response.CreatedTime = trade.CreatedTime
-	response.Price = trade.Price
+	response.UnitPrice = trade.UnitPrice
 	response.EntryTime = trade.ExitTime
 	response.EntryPrice = trade.EntryPrice
 	response.TradingCost = trade.TradingCost
@@ -62,4 +65,11 @@ func (TradeServiceImpl *TradeServiceImpl) generateResponseFromTrade(trade model.
 	response.ExitTime = trade.ExitTime
 	response.PercentageGain = trade.PercentageGain
 	return
+}
+
+
+func GetTradeServiceImpl() service.TradeService {
+	return &TradeServiceImpl{
+		repository: impl.GetTradeRepositoryImpl(),
+	}
 }
