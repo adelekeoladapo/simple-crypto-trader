@@ -49,6 +49,24 @@ func (TradeServiceImpl *TradeServiceImpl) ListTrades(request dto.ListRequest) (d
 	panic("implement me")
 }
 
+func (TradeServiceImpl *TradeServiceImpl) StartTrade(id int) (response dto.TradeResponse, e error) {
+	trade, e := TradeServiceImpl.repository.FindTradeById(id)
+	if e != nil {
+		return
+	}
+	trade.Status = status.RUNNING
+	if trade.EntryTime == nil {
+		now := time.Now()
+		trade.EntryTime = &now
+	}
+	trade, e = TradeServiceImpl.repository.UpdateTrade(trade)
+	if e != nil {
+		return
+	}
+	response, _ = TradeServiceImpl.generateResponseFromTrade(trade)
+	return
+}
+
 func (TradeServiceImpl *TradeServiceImpl) generateResponseFromTrade(trade model.Trade) (response dto.TradeResponse, e error) {
 	response.Id = trade.ID
 	response.Product = trade.Product

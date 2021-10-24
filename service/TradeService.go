@@ -12,5 +12,7 @@ type TradeService interface {
 
 	ListTrades(request dto.ListRequest) (dto.ListResponse, error)
 
+	StartTrade(id int) (dto.TradeResponse, error)
+
 }
 

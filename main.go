@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"gitlab.com/dapo/crypto-trader/db"
-	"gitlab.com/dapo/crypto-trader/dto"
 	"gitlab.com/dapo/crypto-trader/service"
 	"gitlab.com/dapo/crypto-trader/service/impl"
 	"log"
@@ -27,9 +26,10 @@ func main() {
 
 
 
-	// Test new trade
+	// Test Trade Service
 	var tradeService service.TradeService
 	tradeService = impl.GetTradeServiceImpl()
+	/*  New Trade
 	newTradeRequest := dto.NewTradeRequest{
 		Quantity:            11.4,
 		Product:             "ETHUSDT",
@@ -41,8 +41,13 @@ func main() {
 		fmt.Println(err)
 	} else {
 		fmt.Printf("Response: %v \n", res)
-	}
+	} */
 
+	if res, e := tradeService.StartTrade(1); e != nil {
+		fmt.Println(e)
+	} else {
+		fmt.Println("Response: ", res)
+	}
 
 
 
