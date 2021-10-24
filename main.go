@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"gitlab.com/dapo/crypto-trader/db"
+	"gitlab.com/dapo/crypto-trader/dto"
 	"gitlab.com/dapo/crypto-trader/service"
 	"gitlab.com/dapo/crypto-trader/service/impl"
 	"log"
@@ -43,7 +44,20 @@ func main() {
 		fmt.Printf("Response: %v \n", res)
 	} */
 
+	/* Start Trade
 	if res, e := tradeService.StartTrade(1); e != nil {
+		fmt.Println(e)
+	} else {
+		fmt.Println("Response: ", res)
+	}	 */
+
+	if res, e := tradeService.ListTrades(dto.ListRequest{
+		Offset:    0,
+		Limit:     5,
+		Filter:    "",
+		SortField: "",
+		SortOrder: "",
+	}); e != nil {
 		fmt.Println(e)
 	} else {
 		fmt.Println("Response: ", res)

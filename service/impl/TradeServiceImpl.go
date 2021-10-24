@@ -45,8 +45,23 @@ func (TradeServiceImpl *TradeServiceImpl) FindTradeById(id int) (dto.TradeRespon
 	panic("implement me")
 }
 
-func (TradeServiceImpl *TradeServiceImpl) ListTrades(request dto.ListRequest) (dto.ListResponse, error) {
-	panic("implement me")
+func (TradeServiceImpl *TradeServiceImpl) ListTrades(request dto.ListRequest) (response dto.ListResponse, e error) {
+	trades, e := TradeServiceImpl.repository.ListTrades(request)
+	if e != nil {
+		return
+	}
+	tradeResponseList := make([]dto.TradeResponse, 0)
+	for _, value := range trades {
+		t, _ := TradeServiceImpl.generateResponseFromTrade(value)
+		tradeResponseList = append(tradeResponseList, t)
+	}
+	response = dto.ListResponse{
+		Offset: request.Offset,
+		Limit: request.Limit,
+		Total: len(trades),
+		Data: tradeResponseList,
+	}
+	return
 }
 
 func (TradeServiceImpl *TradeServiceImpl) StartTrade(id int) (response dto.TradeResponse, e error) {
