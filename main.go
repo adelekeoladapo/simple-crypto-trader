@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"gitlab.com/dapo/crypto-trader/db"
-	"gitlab.com/dapo/crypto-trader/dto"
-	"gitlab.com/dapo/crypto-trader/service"
-	"gitlab.com/dapo/crypto-trader/service/impl"
+	"gitlab.com/dapo/crypto-trader/processor"
 	"log"
 	"os"
 )
@@ -28,8 +25,8 @@ func main() {
 
 
 	// Test Trade Service
-	var tradeService service.TradeService
-	tradeService = impl.GetTradeServiceImpl()
+	// var tradeService service.TradeService
+	// tradeService = impl.GetTradeServiceImpl()
 	/*  New Trade
 	newTradeRequest := dto.NewTradeRequest{
 		Quantity:            11.4,
@@ -51,6 +48,7 @@ func main() {
 		fmt.Println("Response: ", res)
 	}	 */
 
+	/* List Trades
 	if res, e := tradeService.ListTrades(dto.ListRequest{
 		Offset:    0,
 		Limit:     5,
@@ -61,13 +59,31 @@ func main() {
 		fmt.Println(e)
 	} else {
 		fmt.Println("Response: ", res)
+	} */
+
+
+	// Test Market Simulator
+	ethereumMarket := processor.MarketSimulator{
+		Name:      "Ethereum",
+		StreamUrl: "wss://stream.binance.com:9443/ws/ethusdt@kline_1m",
+		Product:   "ETHUSDT",
 	}
+	bitcoinMarket := processor.MarketSimulator{
+		Name:      "Bitcoin",
+		StreamUrl: "wss://stream.binance.com:9443/ws/btcusdt@kline_1m",
+		Product:   "BTCUSDT",
+	}
+
+	go ethereumMarket.Start()
+	bitcoinMarket.Start()
 
 
 
 	//p := processor.GetIndicatorProcessor()
 	//
 	//p.Process()
+
+
 
 }
 

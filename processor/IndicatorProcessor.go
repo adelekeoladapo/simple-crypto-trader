@@ -23,7 +23,6 @@ type IndicatorProcessor struct {
 }
 
 func (indicatorProcessor *IndicatorProcessor) Process() {
-	//url := "wss://stream.binancefuture.com/ws/btcusdt@markPrice"
 	url := "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 	log.Printf("connecting to %s", url)
 
