@@ -46,7 +46,7 @@ func (TradeRepositoryImpl *TradeRepositoryImpl) ListTrades(request dto.ListReque
 
 	expressionList := TradeRepositoryImpl.Database.Model(&model.Trade{})
 	if request.Filter != "" {
-		expressionList = expressionList.Where("product LIKE ? ", "%" + request.Filter + "%")
+		expressionList = expressionList.Where("product LIKE ? ", "%" + request.Filter + "%").Or("status LIKE ? ", "%" + request.Filter + "%")
 	}
 	expressionList = expressionList.Order(request.SortField + " " + request.SortOrder)
 	expressionList = expressionList.Limit(request.Limit).Offset(request.Offset).Find(&t)

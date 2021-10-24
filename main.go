@@ -54,7 +54,7 @@ func main() {
 	if res, e := tradeService.ListTrades(dto.ListRequest{
 		Offset:    0,
 		Limit:     5,
-		Filter:    "",
+		Filter:    "RUNNING",
 		SortField: "",
 		SortOrder: "",
 	}); e != nil {
