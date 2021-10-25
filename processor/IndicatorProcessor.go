@@ -20,6 +20,7 @@ type IndicatorProcessor struct {
 	TRADE_QUANTITY float64
 	IN_POSITION bool
 	ExchangeService service.ExchangeService
+	LATEST_BUY_PRICE float64
 }
 
 func (indicatorProcessor *IndicatorProcessor) Process() {
@@ -34,6 +35,7 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 
 	var closes []float64
 	inPosition := indicatorProcessor.IN_POSITION
+	latestBuyPrice := indicatorProcessor.LATEST_BUY_PRICE
 	for {
 		_, message, readErr := conn.ReadMessage()
 		if readErr != nil {
@@ -61,12 +63,16 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 					if rsiIndicatorValue > indicatorProcessor.RSI_OVERBOUGHT {
 						if inPosition {
 							fmt.Println("> > > Sell! Sell! Sell!")
-							if sellErr := indicatorProcessor.ExchangeService.PlaceSellOrder(indicatorProcessor.TRADE_SYMBOL, indicatorProcessor.TRADE_QUANTITY); sellErr != nil {
-								log.Println("> > > ERROR: Could not place sell order.", sellErr)
+							if closePrice > latestBuyPrice {
+								if sellErr := indicatorProcessor.ExchangeService.PlaceSellOrder(indicatorProcessor.TRADE_SYMBOL, indicatorProcessor.TRADE_QUANTITY); sellErr != nil {
+									log.Println("> > > ERROR: Could not place sell order.", sellErr)
+								} else {
+									log.Println("> > > Sell order was successfully placed")
+									indicatorProcessor.showPosition()
+									inPosition = false
+								}
 							} else {
-								log.Println("> > > Sell order was successfully placed")
-								indicatorProcessor.showPosition()
-								inPosition = false
+								log.Println("Not a good price. Bought at ", latestBuyPrice)
 							}
 						} else {
 							fmt.Println("> > > It is overbought but I don't own any. Nothing to sell")
@@ -82,6 +88,7 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 								log.Println("> > > Buy order was successfully placed")
 								indicatorProcessor.showPosition()
 								inPosition = true
+								latestBuyPrice = closePrice
 							}
 						}
 					}
@@ -111,6 +118,7 @@ func GetIndicatorProcessor() IndicatorProcessor {
 	overbought, _ := strconv.ParseFloat(os.Getenv("RSI_OVERBOUGHT"), 64)
 	symbol := os.Getenv("TRADE_SYMBOL")
 	quantity, _ := strconv.ParseFloat(os.Getenv("TRADE_QUANTITY"), 64)
+	latestBuyPrice, _ := strconv.ParseFloat(os.Getenv("LATEST_BUY_PRICE"), 64)
 	inPosition, _ := strconv.ParseBool(os.Getenv("IN_POSITION"))
 	log.Println("Create new instance of RSI Indicator")
 	return IndicatorProcessor{
@@ -121,5 +129,6 @@ func GetIndicatorProcessor() IndicatorProcessor {
 		TRADE_QUANTITY: 	quantity,
 		IN_POSITION: 		inPosition,
 		ExchangeService: 	impl.GetBinanceService(),
+		LATEST_BUY_PRICE: latestBuyPrice,
 	}
 }
