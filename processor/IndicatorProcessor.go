@@ -63,17 +63,18 @@ func (indicatorProcessor *IndicatorProcessor) Process() {
 					if rsiIndicatorValue > indicatorProcessor.RSI_OVERBOUGHT {
 						if inPosition {
 							fmt.Println("> > > Sell! Sell! Sell!")
-							if closePrice > latestBuyPrice {
+							//if closePrice > latestBuyPrice {
 								if sellErr := indicatorProcessor.ExchangeService.PlaceSellOrder(indicatorProcessor.TRADE_SYMBOL, indicatorProcessor.TRADE_QUANTITY); sellErr != nil {
 									log.Println("> > > ERROR: Could not place sell order.", sellErr)
 								} else {
 									log.Println("> > > Sell order was successfully placed")
+									log.Println("Last buy price ", latestBuyPrice)
 									indicatorProcessor.showPosition()
 									inPosition = false
 								}
-							} else {
-								log.Println("Not a good price. Bought at ", latestBuyPrice)
-							}
+							//} else {
+							//	log.Println("Not a good price. Bought at ", latestBuyPrice)
+							//}
 						} else {
 							fmt.Println("> > > It is overbought but I don't own any. Nothing to sell")
 						}
